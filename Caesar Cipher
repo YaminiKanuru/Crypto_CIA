@@ -1,0 +1,34 @@
+#include <iostream>
+#include <string>
+#include <cctype>
+using namespace std;
+
+string caesarEncrypt(const string &text, int shift) {
+    string result;
+    for (char c : text) {
+        if (isalpha(c)) {
+            char base = isupper(c) ? 'A' : 'a';
+            result += char((c - base + shift) % 26 + base);
+        } else {
+            result += c;
+        }
+    }
+    return result;
+}
+
+string caesarDecrypt(const string &text, int shift) {
+    // decryption is just encryption with inverse shift mod 26
+    return caesarEncrypt(text, 26 - (shift % 26));
+}
+
+int main() {
+    string message = "Hello, World!";
+    int shift = 3;
+    string enc = caesarEncrypt(message, shift);
+    string dec = caesarDecrypt(enc, shift);
+    cout << "Original:  " << message << "\n"
+         << "Encrypted: " << enc << "\n"
+         << "Decrypted: " << dec << "\n";
+    return 0;
+}
+ ⁠
