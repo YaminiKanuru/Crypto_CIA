@@ -1,0 +1,55 @@
+#include <iostream>
+#include <string>
+#include <stdexcept>
+#include <cctype>
+using namespace std;
+
+int modInverse(int a, int m) {
+    a = a % m;
+    for (int x = 1; x < m; x++) {
+        if ((a * x) % m == 1)
+            return x;
+    }
+    throw invalid_argument("Modular inverse does not exist for this key 'a'.");
+}
+
+string affineEncrypt(const string &text, int a, int b) {
+    string result;
+    for (char c : text) {
+        if (isalpha(c)) {
+            char base = isupper(c) ? 'A' : 'a';
+            int x = c - base;
+            result += char(((a * x + b) % 26) + base);
+        } else {
+            result += c;
+        }
+    }
+    return result;
+}
+
+string affineDecrypt(const string &text, int a, int b) {
+    string result;
+    int a_inv = modInverse(a, 26);
+    for (char c : text) {
+        if (isalpha(c)) {
+            char base = isupper(c) ? 'A' : 'a';
+            int x = c - base;
+            result += char((a_inv * ((x - b + 26)) % 26) + base);
+        } else {
+            result += c;
+        }
+    }
+    return result;
+}
+
+int main() {
+    string message = "HELLO Affine Cipher!";
+    int a = 5; // a must be coprime with 26 (e.g., 5)
+    int b = 8;
+    string enc = affineEncrypt(message, a, b);
+    string dec = affineDecrypt(enc, a, b);
+    cout << "Original:  " << message << "\n"
+         << "Encrypted: " << enc << "\n"
+         << "Decrypted: " << dec << "\n";
+    return 0;
+}
