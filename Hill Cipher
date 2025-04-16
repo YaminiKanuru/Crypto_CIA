@@ -1,0 +1,84 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <stdexcept>
+#include <cctype>
+using namespace std;
+
+int mod26(int x) {
+    return (x % 26 + 26) % 26;
+}
+
+int determinant2x2(const vector<vector<int>> &matrix) {
+    return mod26(matrix[0][0]*matrix[1][1] - matrix[0][1]*matrix[1][0]);
+}
+
+int modInverse(int a, int m) {
+    a = mod26(a);
+    for (int x = 1; x < m; x++) {
+        if (mod26(a * x) == 1)
+            return x;
+    }
+    throw invalid_argument("Matrix is not invertible modulo 26.");
+}
+
+vector<vector<int>> inverseMatrix2x2(const vector<vector<int>> &matrix) {
+    int det = determinant2x2(matrix);
+    int det_inv = modInverse(det, 26);
+    vector<vector<int>> inv(2, vector<int>(2));
+    inv[0][0] = mod26(matrix[1][1] * det_inv);
+    inv[0][1] = mod26(-matrix[0][1] * det_inv);
+    inv[1][0] = mod26(-matrix[1][0] * det_inv);
+    inv[1][1] = mod26(matrix[0][0] * det_inv);
+    return inv;
+}
+
+string hillEncrypt(const string &text, const vector<vector<int>> &key) {
+    // Preprocess: keep only letters and convert to uppercase.
+    string msg;
+    for (char c : text) {
+        if (isalpha(c))
+            msg.push_back(toupper(c));
+    }
+    // Pad with 'X' if necessary.
+    if (msg.size() % 2 != 0)
+        msg.push_back('X');
+    
+    string result;
+    for (size_t i = 0; i < msg.size(); i += 2) {
+        int x = msg[i] - 'A';
+        int y = msg[i+1] - 'A';
+        int enc1 = mod26(key[0][0]*x + key[0][1]*y);
+        int enc2 = mod26(key[1][0]*x + key[1][1]*y);
+        result.push_back(char(enc1 + 'A'));
+        result.push_back(char(enc2 + 'A'));
+    }
+    return result;
+}
+
+string hillDecrypt(const string &cipher, const vector<vector<int>> &key) {
+    vector<vector<int>> inv = inverseMatrix2x2(key);
+    string result;
+    for (size_t i = 0; i < cipher.size(); i += 2) {
+        int x = cipher[i] - 'A';
+        int y = cipher[i+1] - 'A';
+        int dec1 = mod26(inv[0][0]*x + inv[0][1]*y);
+        int dec2 = mod26(inv[1][0]*x + inv[1][1]*y);
+        result.push_back(char(dec1 + 'A'));
+        result.push_back(char(dec2 + 'A'));
+    }
+    return result;
+}
+
+int main() {
+    string message = "HELP";
+    // Example key: 2x2 matrix (ensure it is invertible modulo 26)
+    vector<vector<int>> key = { {3, 3}, {2, 5} };
+    string enc = hillEncrypt(message, key);
+    string dec = hillDecrypt(enc, key);
+    cout << "Original:  " << message << "\n"
+         << "Encrypted: " << enc << "\n"
+         << "Decrypted: " << dec << "\n";
+    return 0;
+}
+ ⁠
