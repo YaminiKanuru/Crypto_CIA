@@ -1,0 +1,52 @@
+#include <iostream>
+#include <string>
+#include <cctype>
+using namespace std;
+
+string runningKeyEncrypt(const string &text, const string &key) {
+    string result;
+    int keyLen = key.size();
+    int j = 0;
+    for (char c : text) {
+        if (isalpha(c)) {
+            char base = isupper(c) ? 'A' : 'a';
+            // Convert key to uppercase for consistent shift
+            char keyChar = toupper(key[j % keyLen]);
+            int shift = keyChar - 'A';
+            result += char((c - base + shift) % 26 + base);
+            j++;
+        } else {
+            result += c;
+        }
+    }
+    return result;
+}
+
+string runningKeyDecrypt(const string &text, const string &key) {
+    string result;
+    int keyLen = key.size();
+    int j = 0;
+    for (char c : text) {
+        if (isalpha(c)) {
+            char base = isupper(c) ? 'A' : 'a';
+            char keyChar = toupper(key[j % keyLen]);
+            int shift = keyChar - 'A';
+            result += char((c - base - shift + 26) % 26 + base);
+            j++;
+        } else {
+            result += c;
+        }
+    }
+    return result;
+}
+
+int main() {
+    string message = "HELLO RunningKey Cipher!";
+    string key = "THISISARUNNINGKEY"; // ideally as long as the message (or repeated)
+    string enc = runningKeyEncrypt(message, key);
+    string dec = runningKeyDecrypt(enc, key);
+    cout << "Original:  " << message << "\n"
+         << "Encrypted: " << enc << "\n"
+         << "Decrypted: " << dec << "\n";
+    return 0;
+}
