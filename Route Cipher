@@ -1,0 +1,59 @@
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+string routeEncrypt(const string &text, int columns) {
+    string msg;
+    // Remove spaces
+    for (char c : text)
+        if (c != ' ') msg.push_back(c);
+    int len = msg.size();
+    int rows = (len + columns - 1) / columns;
+    // Pad with 'X' if needed.
+    msg.append(rows * columns - len, 'X');
+    
+    // Fill grid row-wise.
+    vector<vector<char>> grid(rows, vector<char>(columns));
+    int pos = 0;
+    for (int r = 0; r < rows; r++)
+        for (int c = 0; c < columns; c++)
+            grid[r][c] = msg[pos++];
+    
+    // Read the grid column-wise.
+    string result;
+    for (int c = 0; c < columns; c++)
+        for (int r = 0; r < rows; r++)
+            result.push_back(grid[r][c]);
+    return result;
+}
+
+string routeDecrypt(const string &cipher, int columns) {
+    int len = cipher.size();
+    int rows = len / columns;
+    vector<vector<char>> grid(rows, vector<char>(columns));
+    int pos = 0;
+    // Fill grid column-wise.
+    for (int c = 0; c < columns; c++)
+        for (int r = 0; r < rows; r++)
+            grid[r][c] = cipher[pos++];
+    
+    // Read row-wise.
+    string result;
+    for (int r = 0; r < rows; r++)
+        for (int c = 0; c < columns; c++)
+            result.push_back(grid[r][c]);
+    return result;
+}
+
+int main() {
+    string message = "WE ARE DISCOVERED SAVE YOURSELF";
+    int columns = 5;
+    string enc = routeEncrypt(message, columns);
+    string dec = routeDecrypt(enc, columns);
+    cout << "Original (spaces removed): " << message << "\n"
+         << "Encrypted: " << enc << "\n"
+         << "Decrypted (includes padding): " << dec << "\n";
+    return 0;
+}
+ ⁠
