@@ -1,0 +1,23 @@
+#include <iostream>
+#include <string>
+#include <unordered_map>
+using namespace std;
+
+void ngramFrequencies(const string &text, int n) {
+    unordered_map<string, int> freq;
+    for (size_t i = 0; i + n <= text.size(); i++) {
+        string gram = text.substr(i, n);
+        freq[gram]++;
+    }
+    for (const auto &pair : freq) {
+        cout << "'" << pair.first << "': " << pair.second << "\n";
+    }
+}
+
+int main() {
+    string message = "THIS IS A TEST TEXT FOR NGRAM OPERATIONS";
+    int n = 2;
+    cout << "n-gram frequencies for n = " << n << ":\n";
+    ngramFrequencies(message, n);
+    return 0;
+}
