@@ -1,0 +1,52 @@
+#include <iostream>
+#include <string>
+#include <cctype>
+using namespace std;
+
+string vigenereEncrypt(const string &text, const string &key) {
+    string result;
+    int keyLen = key.size();
+    int j = 0;
+    for (char c : text) {
+        if (isalpha(c)) {
+            char base = isupper(c) ? 'A' : 'a';
+            // Use key letter in uppercase for the shift
+            char keyChar = toupper(key[j % keyLen]);
+            int shift = keyChar - 'A';
+            result += char((c - base + shift) % 26 + base);
+            j++;
+        } else {
+            result += c;
+        }
+    }
+    return result;
+}
+
+string vigenereDecrypt(const string &text, const string &key) {
+    string result;
+    int keyLen = key.size();
+    int j = 0;
+    for (char c : text) {
+        if (isalpha(c)) {
+            char base = isupper(c) ? 'A' : 'a';
+            char keyChar = toupper(key[j % keyLen]);
+            int shift = keyChar - 'A';
+            result += char((c - base - shift + 26) % 26 + base);
+            j++;
+        } else {
+            result += c;
+        }
+    }
+    return result;
+}
+
+int main() {
+    string message = "HELLO Vigenere Cipher!";
+    string key = "KEY";
+    string enc = vigenereEncrypt(message, key);
+    string dec = vigenereDecrypt(enc, key);
+    cout << "Original:  " << message << "\n"
+         << "Encrypted: " << enc << "\n"
+         << "Decrypted: " << dec << "\n";
+    return 0;
+}
