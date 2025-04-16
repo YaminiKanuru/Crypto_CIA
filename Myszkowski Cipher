@@ -1,0 +1,94 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+struct KeyIndex {
+    char keyChar;
+    int index;
+};
+
+string myszkowskiEncrypt(const string &text, const string &key) {
+    // Remove spaces from text.
+    string msg;
+    for (char c : text) {
+        if (c != ' ')
+            msg.push_back(c);
+    }
+    int columns = key.size();
+    int rows = (msg.size() + columns - 1) / columns;
+    msg.append(rows * columns - msg.size(), 'X');  // pad if needed
+
+    // Fill grid row-wise.
+    vector<vector<char>> grid(rows, vector<char>(columns));
+    int pos = 0;
+    for (int r = 0; r < rows; r++) {
+        for (int c = 0; c < columns; c++) {
+            grid[r][c] = msg[pos++];
+        }
+    }
+    
+    // Pair key characters with their column indices.
+    vector<KeyIndex> keyOrder;
+    for (int i = 0; i < columns; i++)
+        keyOrder.push_back({key[i], i});
+    
+    // Stable sort by keyChar so that repeated letters keep their original order.
+    stable_sort(keyOrder.begin(), keyOrder.end(), [](const KeyIndex &a, const KeyIndex &b) {
+        return a.keyChar < b.keyChar;
+    });
+    
+    // Read out the columns according to the sorted order.
+    string cipher;
+    for (auto &ki : keyOrder) {
+        int col = ki.index;
+        for (int r = 0; r < rows; r++)
+            cipher.push_back(grid[r][col]);
+    }
+    return cipher;
+}
+
+string myszkowskiDecrypt(const string &cipher, const string &key) {
+    int columns = key.size();
+    int rows = cipher.size() / columns;
+    
+    // Build key order vector.
+    vector<KeyIndex> keyOrder;
+    for (int i = 0; i < columns; i++)
+        keyOrder.push_back({key[i], i});
+    stable_sort(keyOrder.begin(), keyOrder.end(), [](const KeyIndex &a, const KeyIndex &b) {
+        return a.keyChar < b.keyChar;
+    });
+    
+    // Prepare a vector to hold column strings.
+    vector<string> colTexts(columns);
+    int pos = 0;
+    // Assign segments of the cipher text to the proper original column indices.
+    for (auto &ki : keyOrder) {
+        int origCol = ki.index;
+        colTexts[origCol] = cipher.substr(pos, rows);
+        pos += rows;
+    }
+    
+    // Reconstruct plaintext by reading row-wise.
+    string plain;
+    for (int r = 0; r < rows; r++) {
+        for (int c = 0; c < columns; c++) {
+            plain.push_back(colTexts[c][r]);
+        }
+    }
+    return plain;
+}
+
+int main() {
+    string message = "THIS IS A SECRET MESSAGE";
+    string key = "BALLOON";  // Key with repeated letters
+    string enc = myszkowskiEncrypt(message, key);
+    string dec = myszkowskiDecrypt(enc, key);
+    cout << "Original (no spaces): " << message << "\n"
+         << "Encrypted: " << enc << "\n"
+         << "Decrypted: " << dec << "\n";
+    return 0;
+}
+ ⁠
